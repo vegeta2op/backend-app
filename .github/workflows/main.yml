@@ -32,14 +32,13 @@ jobs:
       - name: Run Flake8 linting
         run: |
           pip install flake8
-          pip install autoflake8
-          autoflake8 .
+          pip install black
+          black .
           flake8 --max-line-length=120 .
 
       - name: Run Black code formatting check
         run: |
           pip install black
-          black .
           black --check .
 
       - name: Run unit tests and Integrations
