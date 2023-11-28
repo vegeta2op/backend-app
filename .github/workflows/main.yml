@@ -1,39 +1,44 @@
-name: Python CI
+name: Django CI
 
 on: [push, pull_request]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version: [3.12] 
+        python-version: [3.12]
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.12
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12
 
-    - name: Install Django
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install django
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install django
 
-    - name: Run unit tests and Integration tests 
-      run: |
-         run: python manage.py test backend_app
+      - name: Prepare database
+        run: |
+          python manage.py makemigrations
+          python manage.py migrate
+          python manage.py collectstatic --no-input
 
+      - name: Run Flake8 linting
+        run: |
+          pip install flake8
+          flake8 .
 
-    - name: Lint code with Flake8
-      run: |
-        python -m pip install flake8
-        flake8 .
+      - name: Run Black code formatting check
+        run: |
+          pip install black
+          black --check .
 
-    - name: Format code with Black
-      run: |
-        python -m pip install black
-        black . --check
+      - name: Run unit tests and Integrations
+        run: python manage.py test backend_app
+
